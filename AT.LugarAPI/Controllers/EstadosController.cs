@@ -10,7 +10,7 @@ using Repository.Context;
 
 namespace AT.WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/estados")]
     [ApiController]
     public class EstadosController : ControllerBase
     {
@@ -70,10 +70,12 @@ namespace AT.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Estado>> PostEstado(Estado estado)
+        public async Task<ActionResult<Estado>> PostEstado(EstadoResponse estadoResponse)
         {
-            var pais = await _context.Paises.FirstOrDefaultAsync(x => x.Id == estado.Pais.Id);
-            estado.Pais = pais;
+            var pais = await _context.Paises.FirstOrDefaultAsync(x => x.Id == estadoResponse.Pais.Id);
+            estadoResponse.Pais = pais;
+
+            Estado estado = new Estado { Nome = estadoResponse.Nome, Bandeira = estadoResponse.Bandeira, Pais = estadoResponse.Pais};
 
             _context.Estados.Add(estado);
             await _context.SaveChangesAsync();

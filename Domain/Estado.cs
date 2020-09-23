@@ -7,7 +7,6 @@ namespace Domain
         public int Id { get; set; }
         public string Nome { get; set; }
         public string Bandeira { get; set; }
-        [JsonIgnore]
         public Pais Pais { get; set; }
     }
 }
