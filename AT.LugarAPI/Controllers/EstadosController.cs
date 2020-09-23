@@ -87,15 +87,42 @@ namespace AT.WebAPI.Controllers
         public async Task<ActionResult<Estado>> DeleteEstado(int id)
         {
             var estado = await _context.Estados.FindAsync(id);
+
+            var pessoas = await _context.Pessoas.Include(x => x.Amigos).Include(x => x.Estado).ToListAsync();
+
             if (estado == null)
             {
                 return NotFound();
             }
 
-            _context.Estados.Remove(estado);
-            await _context.SaveChangesAsync();
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    foreach (var x in pessoas)
+                    {
+                        if (x.Estado == estado)
+                        {
+                            foreach (var y in x.Amigos)
+                            {
+                                _context.Amigos.Remove(y);
+                            }
+                            _context.Pessoas.Remove(x);
+                        }
+                    }
 
-            return estado;
+                    _context.Estados.Remove(estado);
+                    await _context.SaveChangesAsync();
+
+                    transaction.Commit();
+                }
+                catch
+                {
+                    transaction.Rollback();
+                }
+            }
+
+            return NoContent();
         }
 
         private bool EstadoExists(int id)

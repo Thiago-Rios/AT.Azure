@@ -81,7 +81,9 @@ namespace AT.WebAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Pais>> DeletePais(int id)
         {
-            var pais = await _context.Paises.FirstOrDefaultAsync(x => x.Id == id);
+            var pais = await _context.Paises.Include(x => x.Estados).FirstOrDefaultAsync(x => x.Id == id);
+
+            var pessoas = await _context.Pessoas.Include(x => x.Amigos).ToListAsync();
 
             if (pais == null)
             {
@@ -93,6 +95,23 @@ namespace AT.WebAPI.Controllers
             {
                 try
                 {
+                    foreach (var x in pessoas)
+                    {
+                        if (x.Pais.Id == pais.Id)
+                        {
+                            foreach (var y in x.Amigos)
+                            {
+                                _context.Amigos.Remove(y);
+                            }
+                            _context.Pessoas.Remove(x);
+                        }
+                    }
+
+                    foreach (var item in pais.Estados)
+                    {
+                        _context.Estados.Remove(item);
+                    }
+
                     _context.Paises.Remove(pais);
                     await _context.SaveChangesAsync();
 

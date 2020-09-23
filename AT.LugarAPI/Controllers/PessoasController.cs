@@ -94,7 +94,7 @@ namespace Assessment.API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Pessoa>> DeletePessoa(int id)
         {
-            var pessoa = await _context.Pessoas.FirstOrDefaultAsync(x => x.Id == id);
+            var pessoa = await _context.Pessoas.Include(x => x.Amigos).FirstOrDefaultAsync(x => x.Id == id);
 
             if (pessoa == null)
             {
@@ -105,6 +105,11 @@ namespace Assessment.API.Controllers
             {
                 try
                 {
+                    foreach (var item in pessoa.Amigos)
+                    {
+                        _context.Amigos.Remove(item);
+                    }
+
                     _context.Pessoas.Remove(pessoa);
                     await _context.SaveChangesAsync();
 
