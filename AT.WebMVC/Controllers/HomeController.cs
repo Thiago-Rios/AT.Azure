@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using AT.WebMVC.Models;
+using AT.WebMVC.Models.HomeModel;
+using RestSharp;
+using Domain;
 
 namespace AT.WebMVC.Controllers
 {
@@ -20,7 +23,23 @@ namespace AT.WebMVC.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            ListaQuantidadeViewModel viewModel = new ListaQuantidadeViewModel();
+
+            var restClient = new RestClient();
+
+            var requestPessoa = new RestRequest("http://localhost:5000/api/pessoas", DataFormat.Json);
+            var responsePessoa = restClient.Get<List<Pessoa>>(requestPessoa);
+            viewModel.QntPessoas = responsePessoa.Data.Count;
+
+            var requestPais = new RestRequest("http://localhost:5000/api/paises", DataFormat.Json);
+            var responsePais = restClient.Get<List<Pais>>(requestPais);
+            viewModel.QntPaises = responsePais.Data.Count;
+
+            var requestEstado = new RestRequest("http://localhost:5000/api/estados", DataFormat.Json);
+            var responseEstado = restClient.Get<List<Estado>>(requestEstado);
+            viewModel.QntEstados = responseEstado.Data.Count;
+
+            return View(viewModel);
         }
 
         public IActionResult Privacy()
